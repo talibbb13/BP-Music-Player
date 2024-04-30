@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Music Player</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+
+  <body class="overflow-hidden">
+    <div id="main" class="min-h-full bg-black text-white">
+      <nav class="height-[30vh] px-5 py-3 flex justify-between items-center">
+        <div id="left" class="flex justify-center items-center gap-7">
+          <div id="brand" class="text-5xl">
+            <i class="ri-netease-cloud-music-fill"></i>
+          </div>
+          <div id="search">
+            <input
+              type="search"
+              class="w-[40vw] pl-5 pr-3 py-2 text-white rounded-lg bg-gray-800 bg-gray-900 placeholder-gray-300 outline-none text-sm"
+              placeholder="Search me...."
+            />
+          </div>
+        </div>
+        <div id="right" class="text-lg flex justify-between items-center gap-5">
+          <i class="ri-heart-fill cursor-pointer"></i>
+          <i class="ri-menu-add-line cursor-pointer"></i>
+          <i class="ri-information-2-fill cursor-pointer"></i>
+          <i class="ri-contacts-book-3-fill cursor-pointer"></i>
+        </div>
+      </nav>
+      <hr />
+      <div id="hero" class="h-[70vh] flex justify-evenly items-start px-7 mt-5">
+        <div
+          id="playing-song"
+          class="flex justify-center items-center flex-col"
+        >
+          <img
+            id="artist-banner"
+            src="https://yt3.googleusercontent.com/QiI-c4cFyRPD0qVwTQooC3dlgJqHA_t6CpEAv818om-mqL9bqNDL4L_qXQVXx_eY76D_7cLD=s900-c-k-c0x00ffffff-no-rj"
+            class="border rounded-lg h-80 w-80 object-cover"
+          />
+          <div
+            id="song-conrols"
+            class="w-full flex justify-center items-center gap-3 text-2xl py-2"
+          >
+            <i
+              class="ri-volume-up-fill cursor-pointer text-lg hover:bg-zinc-700 rounded-full h-7 w-7 flex justify-center items-center relative"
+            >
+              <div class="range w-[13rem] absolute top-10 left-0">
+                <input
+                  id="volumeBar"
+                  class="hidden"
+                  type="range"
+                  min="0"
+                  max="100"
+                  value="100"
+                  step="3"
+                />
+              </div>
+            </i>
+            <i
+              id="backward"
+              class="ri-skip-back-fill cursor-pointer hover:bg-zinc-700 rounded-full p-px h-[2rem] w-[2rem] flex justify-center items center"
+            ></i>
+            <div
+              id="play-pause"
+              class="h-10 w-10 border rounded-full flex justify-center items-center hover:bg-zinc-700"
+            >
+              <i
+                id="playCurrent"
+                class="ri-play-fill cursor-pointer hover:bg-zinc-700 rounded-full p-px"
+              ></i>
+            </div>
+            <i
+              id="forward"
+              class="ri-skip-forward-fill cursor-pointer hover:bg-zinc-700 rounded-full h-[2rem] w-[2rem] flex justify-center items center"
+            ></i>
+            <i
+              id="fav-icon"
+              class="ri-heart-fill cursor-pointer text-lg hover:bg-zinc-700 rounded-full h-7 w-7 flex justify-center items-center"
+            ></i>
+          </div>
+        </div>
+        <div
+          id="current-playlist"
+          class="h-[100%] min-w-[45vw] flex justify-start items-center flex-col pl-3"
+        >
+          <div
+            id="playlist-header"
+            class="flex justify-between items-center w-[100%] py-2"
+          >
+            <div>
+              <h1
+                id="song-title"
+                class="text-3xl font-semibold tracking-wide font-thin jersey"
+              >
+                input songs :|
+              </h1>
+              <h3
+                id="song-artists"
+                class="inline pr-5 font-medium ubuntu text-lg"
+              >
+                to see song details
+              </h3>
+              <h3 id="total-songs" class="inline font-semibold">0 songs</h3>
+            </div>
+            <div id="freq-graph" class="text-xs">Giraffe</div>
+          </div>
+          <div
+            id="playlist"
+            class="h-[100%] w-[100%] overflow-y-scroll flex flex-col gap-2"
+          ></div>
+        </div>
+      </div>
+      <footer class="h-[7vh] w-screen absolute bottom-7 left-0">
+        <div id="ad" class="h-[20vw] w-[20vw] absolute top-0 left-[2%]">
+          <img
+            src="https://www.upwork.com/mc/documents/Liberty-Mutual.png"
+            alt="ad"
+          />
+        </div>
+        <div class="absolute w-[70vw] h-[100%] right-[3%] top-1/2">
+          <div id="seekbar" class="flex justify-end items-center gap-3">
+            <h3 id="song-duration" class="font-bold text-sm">0:00</h3>
+
+            <div class="range w-full">
+              <input
+                id="seekBar"
+                type="range"
+                min="0"
+                max="100"
+                value="0"
+                step="1"
+              />
+            </div>
+
+            <i
+              class="ri-shuffle-fill cursor-pointer text-sm font-extrabold"
+            >
+       
+          </i>
+            
+            <i
+              class="relative ri-speed-up-fill cursor-pointer text-sm font-black text-white-600"
+            >
+              <div
+                id="speed-indicator"
+                class="h-[2rem] w-[2rem] absolute top-[-50%] left-0 text-[10px] jersey tracking-widest"
+              ></div>
+            </i>
+            <i id="share-icon" class="ri-share-fill cursor-pointer text-sm"></i>
+          </div>
+        </div>
+             <div id="share-msg" class="absolute -bottom-[400%] left-1/2 -translate-x-1/2 -translate-y-6 transition">
+              <p>URL Copied to Clipboard</p>
+    </div>
+      </footer>
+    
+    </div>
+
+    <script src="main.js"></script>
+  </body>
+</html>
