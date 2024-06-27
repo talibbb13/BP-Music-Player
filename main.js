@@ -69,77 +69,88 @@ const musicDets = [
       "https://miro.medium.com/v2/resize:fit:825/1*2CMKE33zsBfCC34IRUfiog.jpeg",
   },
 ];
+
 const audio = new Audio();
-// const favSongsDets = []
-var playingSong = 0;
+let playingSong = 0;
+
 const playlist = document.querySelector("#playlist");
 const songTitle = document.querySelector("#song-title");
 const songArtist = document.querySelector("#song-artists");
 const artistBanner = document.querySelector("#artist-banner");
 const playCurrent = document.querySelector("#playCurrent");
 
-// core functions
 function displaySongs() {
-  var clutter = "";
-  musicDets.forEach(function (song, index) {
-    clutter += `<div class="song flex justify-between items-center border rounded-lg px-3 py-2 hover:bg-zinc-700">
-              <div>
-                <i data-ind=${index} id="playlist-icon" class="ri-play-fill pr-2 cursor-pointer"></i>
-                <h3 id="playlist-title" class="inline text-sm">${song.title}</h3>
-              </div>
-              <i class="ri-more-fill"></i>
-            </div>`;
-    if (index == 0) {
-      updateTitle();
-      updateArtist();
-      updateArtistBanner();
-    } else if (index == musicDets.length - 1) {
-      document.querySelector("#total-songs").innerHTML = index + 1 + " Songs";
-    }
-  });
-  playlist.innerHTML = clutter;
+  const songElements = musicDets
+    .map(
+      (song, index) => `
+    <div class="song flex justify-between items-center border rounded-lg px-3 py-2 hover:bg-zinc-700">
+      <div>
+        <i data-ind=${index} id="playlist-icon" class="ri-play-fill pr-2 cursor-pointer"></i>
+        <h3 id="playlist-title" class="inline text-sm">${song.title}</h3>
+      </div>
+      <i class="ri-more-fill"></i>
+    </div>`
+    )
+    .join("");
+
+  playlist.innerHTML = songElements;
+  document.querySelector(
+    "#total-songs"
+  ).innerHTML = `${musicDets.length} Songs`;
+  updateSongDetails();
+}
+
+function updateSongDetails() {
+  songTitle.innerHTML = musicDets[playingSong].title;
+  songArtist.innerHTML = musicDets[playingSong].artist;
+  artistBanner.src = musicDets[playingSong].banner;
+}
+
+function resetPlayIcons() {
+  document
+    .querySelectorAll("#playlist .ri-play-fill,#playlist .ri-pause-fill")
+    .forEach((icon) => {
+      icon.classList.remove("ri-pause-fill");
+      icon.classList.add("ri-play-fill");
+    });
+}
+
+function currentPlaylistSongIcon() {
+  return document.querySelector(`body [data-ind="${playingSong}"]`);
+}
+
+function handlePlayPauseIcons(target, isPlaying) {
+  target.classList.toggle("ri-play-fill", !isPlaying);
+  target.classList.toggle("ri-pause-fill", isPlaying);
+  playCurrent.classList.toggle("ri-play-fill", !isPlaying);
+  playCurrent.classList.toggle("ri-pause-fill", isPlaying);
 }
 
 function playSongs() {
-  playlist.addEventListener("click", function (dets) {
-    if (dets.target.classList.contains("ri-play-fill")) {
+  playlist.addEventListener("click", (event) => {
+    const target = event.target;
+    if (
+      target.classList.contains("ri-play-fill") ||
+      target.classList.contains("ri-pause-fill")
+    ) {
       resetPlayIcons();
-      playingSong = dets.target.dataset.ind;
+      const isPlaying = target.classList.contains("ri-play-fill");
+      playingSong = +target.dataset.ind;
       audio.src = musicDets[playingSong].location;
-      audio.play();
-      dets.target.classList.remove("ri-play-fill");
-      dets.target.classList.add("ri-pause-fill");
-      playCurrent.classList.remove("ri-play-fill");
-      playCurrent.classList.add("ri-pause-fill");
-      updateTitle();
-      updateArtist();
-      updateArtistBanner();
-    } else if (dets.target.classList.contains("ri-pause-fill")) {
-      audio.pause();
-      dets.target.classList.remove("ri-pause-fill");
-      dets.target.classList.add("ri-play-fill");
-      playCurrent.classList.remove("ri-pause-fill");
-      playCurrent.classList.add("ri-play-fill");
+      isPlaying ? audio.play() : audio.pause();
+      handlePlayPauseIcons(target, isPlaying);
+      updateSongDetails();
     }
   });
 }
 
 function playCurrentSong() {
-  playCurrent.addEventListener("click", function (dets) {
-    if (dets.target.classList.contains("ri-play-fill")) {
-      audio.src = musicDets[playingSong].location;
-      audio.play();
-      dets.target.classList.remove("ri-play-fill");
-      dets.target.classList.add("ri-pause-fill");
-      currentPlaylistSongIcon().classList.remove("ri-play-fill");
-      currentPlaylistSongIcon().classList.add("ri-pause-fill");
-    } else if (dets.target.classList.contains("ri-pause-fill")) {
-      audio.pause();
-      dets.target.classList.remove("ri-pause-fill");
-      dets.target.classList.add("ri-play-fill");
-      currentPlaylistSongIcon().classList.remove("ri-pause-fill");
-      currentPlaylistSongIcon().classList.add("ri-play-fill");
-    }
+  playCurrent.addEventListener("click", (event) => {
+    const isPlaying = playCurrent.classList.contains("ri-play-fill");
+    audio.src = musicDets[playingSong].location;
+    isPlaying ? audio.play() : audio.pause();
+    handlePlayPauseIcons(currentPlaylistSongIcon(), isPlaying);
+    updateSongDetails();
   });
 }
 
@@ -149,88 +160,47 @@ function nextSong() {
 }
 
 function forwardCBF() {
-  if (playingSong == musicDets.length - 1) {
-    restartPlaylist();
-    resetPlayIcons();
-    currentPlaylistSongIcon().classList.remove("ri-play-fill");
-    currentPlaylistSongIcon().classList.add("ri-pause-fill");
-  } else {
-    playingSong++;
-    audio.src = musicDets[playingSong].location;
-    audio.play();
-    updateTitle();
-    updateArtist();
-    updateArtistBanner();
-    playCurrent.classList.remove("ri-play-fill");
-    playCurrent.classList.add("ri-pause-fill");
-    currentPlaylistSongIcon().classList.remove("ri-play-fill");
-    currentPlaylistSongIcon().classList.add("ri-pause-fill");
-
-    document
-      .querySelector(`body [data-ind="${playingSong - 1}"]`)
-      .classList.remove("ri-pause-fill");
-    document
-      .querySelector(`body [data-ind="${playingSong - 1}"]`)
-      .classList.add("ri-play-fill");
-  }
+  playingSong = (playingSong + 1) % musicDets.length;
+  audio.src = musicDets[playingSong].location;
+  audio.play();
+  updateSongDetails();
+  resetPlayIcons();
+  handlePlayPauseIcons(currentPlaylistSongIcon(), true);
 }
 
 function previousSong() {
-  document.querySelector("#backward").addEventListener("click", function () {
-    if (playingSong == 0) {
-      revertPlaylist();
-      resetPlayIcons();
-      currentPlaylistSongIcon().classList.remove("ri-play-fill");
-      currentPlaylistSongIcon().classList.add("ri-pause-fill");
-    } else {
-      playingSong--;
-      audio.src = musicDets[playingSong].location;
-      audio.play();
-      updateTitle();
-      updateArtist();
-      updateArtistBanner();
-
-      document
-        .querySelector(`body [data-ind="${playingSong + 1}"]`)
-        .classList.remove("ri-pause-fill");
-      document
-        .querySelector(`body [data-ind="${playingSong + 1}"]`)
-        .classList.add("ri-play-fill");
-
-      currentPlaylistSongIcon().classList.remove("ri-play-fill");
-      currentPlaylistSongIcon().classList.add("ri-pause-fill");
-    }
+  document.querySelector("#backward").addEventListener("click", () => {
+    playingSong = (playingSong - 1 + musicDets.length) % musicDets.length;
+    audio.src = musicDets[playingSong].location;
+    audio.play();
+    updateSongDetails();
+    resetPlayIcons();
+    handlePlayPauseIcons(currentPlaylistSongIcon(), true);
   });
 }
 
 function songSeekBar() {
   const seekBar = document.querySelector("#seekBar");
-  audio.addEventListener("loadedmetadata", () => {
-    seekBar.max = audio.duration;
-  });
-
-  audio.addEventListener("timeupdate", function () {
-    seekBar.value = audio.currentTime;
-  });
-
-  seekBar.addEventListener("input", function () {
-    audio.currentTime = seekBar.value;
-  });
+  audio.addEventListener(
+    "loadedmetadata",
+    () => (seekBar.max = audio.duration)
+  );
+  audio.addEventListener(
+    "timeupdate",
+    () => (seekBar.value = audio.currentTime)
+  );
+  seekBar.addEventListener("input", () => (audio.currentTime = seekBar.value));
 }
 
 function updateLeftoverTime() {
-  audio.addEventListener("timeupdate", function () {
-    const currentTime = audio.currentTime;
-    const duration = audio.duration;
-    const leftoverTime = duration - currentTime;
-
+  audio.addEventListener("timeupdate", () => {
+    const leftoverTime = audio.duration - audio.currentTime;
     const minutes = Math.floor(leftoverTime / 60)
       .toString()
       .padStart(2, "0");
     const seconds = Math.floor(leftoverTime % 60)
       .toString()
       .padStart(2, "0");
-
     document.querySelector(
       "#song-duration"
     ).textContent = `${minutes}:${seconds}`;
@@ -240,74 +210,33 @@ function updateLeftoverTime() {
 function controlVolume() {
   const volumeBar = document.querySelector("#volumeBar");
   const volumeIcon = document.querySelector(".ri-volume-up-fill");
-  volumeIcon.addEventListener("click", function () {
-    if (volumeBar.classList.contains("hidden")) {
-      volumeBar.classList.remove("hidden");
-    } else {
-      volumeBar.classList.add("hidden");
-    }
-  });
+  audio.volume = volumeBar.value / 100;
 
-  volumeBar.addEventListener("click", function () {
-    event.stopPropagation();
-  });
-  volumeBar.addEventListener("change", function () {
-    if (audio) {
-      audio.volume = volumeBar.value / 100;
-    }
-  });
+  volumeIcon.addEventListener("click", () =>
+    volumeBar.classList.toggle("hidden")
+  );
+  volumeBar.addEventListener("click", (event) => event.stopPropagation());
+  volumeBar.addEventListener(
+    "change",
+    () => (audio.volume = volumeBar.value / 100)
+  );
 }
-
-// need to work on it
-// function addRemoveFav() {
-//   const favIcon = document.querySelector("#fav-icon");
-//   favIcon.addEventListener("click", function () {
-//     if (this.classList.contains("text-red-600")) {
-//       this.classList.remove("text-red-600")
-//       favSongsDets.pop()
-//     }
-//     else {
-//       this.classList.add("text-red-600");
-//       favSongsDets.push(musicDets[playingSong]);
-//     }
-//   })
-// }
 
 function shuffleSongs() {
   const shuffleIcon = document.querySelector(".ri-shuffle-fill");
-  shuffleIcon.addEventListener("click", function () {
-    if (this.classList.contains("text-red-600")) {
-      this.classList.remove("text-red-600");
-    } else {
-      this.classList.add("text-red-600");
-      var ranSongInd = Math.floor(Math.random() * musicDets.length);
-      playingSong = ranSongInd;
-      playingSong = ranSongInd; // Get a new random song
-      audio.src = musicDets[playingSong].location; // Update source
-      audio.play(); // Play the new song
-      updateTitle();
-      updateArtist();
-      updateArtistBanner();
-      resetPlayIcons();
-      currentPlaylistSongIcon().classList.remove("ri-play-fill");
-      currentPlaylistSongIcon().classList.add("ri-pause-fill");
-      if (playCurrent.classList.contains("ri-play-fill")) {
-        playCurrent.classList.remove("ri-play-fill");
-        playCurrent.classList.add("ri-pause-fill");
-      }
-      audio.addEventListener("ended", function () {
-        var ranSongInd = Math.floor(Math.random() * musicDets.length);
-        playingSong = ranSongInd;
-        playingSong = ranSongInd; // Get a new random song
-        audio.src = musicDets[playingSong].location; // Update source
-        audio.play(); // Play the new song
-        updateTitle();
-        updateArtist();
-        updateArtistBanner();
+  shuffleIcon.addEventListener("click", () => {
+    shuffleIcon.classList.toggle("text-red-600");
+    if (shuffleIcon.classList.contains("text-red-600")) {
+      forwardCBF = () => {
+        playingSong = Math.floor(Math.random() * musicDets.length);
+        audio.src = musicDets[playingSong].location;
+        audio.play();
+        updateSongDetails();
         resetPlayIcons();
-        currentPlaylistSongIcon().classList.remove("ri-play-fill");
-        currentPlaylistSongIcon().classList.add("ri-pause-fill");
-      })
+        handlePlayPauseIcons(currentPlaylistSongIcon(), true);
+      };
+    } else {
+      forwardCBF = forwardDefaultCBF;
     }
   });
 }
@@ -315,61 +244,17 @@ function shuffleSongs() {
 function songSpeedControl() {
   const speedIcon = document.querySelector(".ri-speed-up-fill");
   const speedIndicator = document.querySelector("#speed-indicator");
-  var flag = 1
-  speedIcon.addEventListener("click", function () {
-    if (audio) {
-      audio.playbackRate = 1;
-      
-      if (flag == 1) {
-        audio.playbackRate = 1.25;
-        this.classList.remove("text-white-600");
-        this.classList.add("text-blue-600");
-        speedIndicator.innerHTML = "1.25x";
-        flag++;
-      }
-      else if (flag == 2) {
-        audio.playbackRate = 1.5;
-        this.classList.remove("text-blue-600");
-        this.classList.add("text-yellow-600");
-        speedIndicator.innerHTML = "1.5x";
-        flag++;
-      }
-      else if (flag == 3) {
-        audio.playbackRate = 2;
-        this.classList.remove("text-yellow-600");
-        this.classList.add("text-red-600");
-        speedIndicator.innerHTML = "2x";
-        flag++;
-      }
-      else {
-        audio.playbackRate = 1;
-        this.classList.remove("text-red-600");
-        this.classList.add("text-white-600");
-        speedIndicator.innerHTML = "";
-        flag = 1;
-      }
+  const speeds = [1, 1.25, 1.5, 2];
+  let currentSpeedIndex = 0;
 
-    }
-  })
+  speedIcon.addEventListener("click", () => {
+    currentSpeedIndex = (currentSpeedIndex + 1) % speeds.length;
+    audio.playbackRate = speeds[currentSpeedIndex];
+    speedIndicator.textContent =
+      currentSpeedIndex === 0 ? "" : `${speeds[currentSpeedIndex]}x`;
+  });
 }
 
-// not supporting on browsers, need to work on it
-// function shareSong() {
-//   const shareIcon = document.querySelector("#share-icon");
-//   const shareMsg = document.querySelector("#share-msg");
-//   const sharedURL = musicDets[playingSong].banner
-//   shareIcon.addEventListener("click", function () {
-//     navigator.clipboard.writeText(sharedURL);
-//     shareMsg.classList.remove("-bottom-[400%]");
-//     shareMsg.classList.add("bottom-0");
-//     setTimeout(() => {
-//       shareMsg.classList.remove("bottom-0");
-//       shareMsg.classList.add("-bottom-[400%]");
-//     }, 5000);
-//   })
-// }
-
-// function's call
 displaySongs();
 playSongs();
 playCurrentSong();
@@ -378,53 +263,5 @@ previousSong();
 songSeekBar();
 updateLeftoverTime();
 controlVolume();
-// addRemoveFav();
 shuffleSongs();
-songSpeedControl()
-// shareSong()
-
-// helper functions
-function resetPlayIcons() {
-  const icons = document.querySelectorAll(
-    "#playlist .ri-play-fill,#playlist .ri-pause-fill"
-  );
-
-  icons.forEach((icon) => {
-    icon.classList.remove("ri-pause-fill");
-    icon.classList.add("ri-play-fill");
-  });
-}
-
-function currentPlaylistSongIcon() {
-  return document.querySelector(`body [data-ind="${playingSong}"]`);
-}
-
-function updateTitle() {
-  return (songTitle.innerHTML = musicDets[playingSong].title);
-}
-
-function updateArtist() {
-  return (songArtist.innerHTML = musicDets[playingSong].artist);
-}
-
-function updateArtistBanner() {
-  return (artistBanner.src = musicDets[playingSong].banner);
-}
-
-function restartPlaylist() {
-  playingSong = 0;
-  audio.src = musicDets[playingSong].location;
-  audio.play();
-  updateTitle();
-  updateArtist();
-  updateArtistBanner();
-}
-
-function revertPlaylist() {
-  playingSong = musicDets.length - 1;
-  audio.src = musicDets[playingSong].location;
-  audio.play();
-  updateTitle();
-  updateArtist();
-  updateArtistBanner();
-}
+songSpeedControl();
